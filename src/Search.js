@@ -1,6 +1,5 @@
 import React from "react";
-function Search(props) {
-    const { value, onChange, children } = props;
+function Search({ value, onChange, children }) {
     return (
       <form>
         {children} <input
