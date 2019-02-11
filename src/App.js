@@ -20,15 +20,25 @@ const list = [
 }, 
 ];
 
+function isSearched(searchTerm) {
+  return function (item) {
+    // some condition which returns true or false
+    return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+  }
+}
+
 
 class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      list
+      list, 
+      searchTerm: '',
     }
     this.onDismiss = this.onDismiss.bind(this);
+    this.onSearchChange = this.onSearchChange.bind(this);
   }
+
 
   onDismiss(id) {
     // const updatedList = this.state.list.filter(function isNotId(item) {
@@ -40,12 +50,20 @@ class App extends Component {
     const updatedList = this.state.list.filter(isNotId);
     this.setState({ list: updatedList });
   }
+  onSearchChange(event) {
+    this.setState({ searchTerm: event.target.value });
+  }
   render() {
     const helloWorld = 'Welcome to the Road to learn React'
+    const {searchTerm, list} = this.state;
     return (
       <div className="App">
+        <form>
+            <input type="text"
+            onChange={this.onSearchChange} />
+        </form>
        {
-         this.state.list.map((item) => {
+        list.filter(isSearched(searchTerm)).map((item) => {
            return (
            <div key={item.objectID}>
              <span>
