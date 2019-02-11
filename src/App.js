@@ -84,9 +84,14 @@ class App extends Component {
     if (!result) { return null; }
     return (
       <div className="page">
-      <div className="page">
+      <div className="interactions">
         <Search value={searchTerm} onChange={this.onSearchChange}>Search</Search>
-        <Table list={result.hits} pattern={searchTerm} onDismiss={this.onDismiss}/>
+        { result
+          ? <Table
+            list={result.hits}
+            pattern={searchTerm}
+            onDismiss={this.onDismiss}/> : null
+          }
         </div>
       </div>
     );
