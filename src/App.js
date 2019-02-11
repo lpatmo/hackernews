@@ -80,7 +80,7 @@ class Table extends Component {
          <span>{item.num_comments}</span>
          <span>{item.points}</span>
          <span>
-         <Button onClick={() => onDismiss(item.objectID)}>
+          <Button onClick={() => onDismiss(item.objectID)}>
                 Dismiss
           </Button>
          </span>
@@ -90,15 +90,15 @@ class Table extends Component {
 }
 
 class Button extends Component { render() {
-  const { onClick, className, children,
+  const { onClick, className='', children,
   } = this.props;
   return ( <button
           onClick={onClick}
           className={className}
-          type="button"
-  >
-  {children}
-  </button> );
+          type="button">
+          {children}
+          </button>
+          );
   }
 }
   
