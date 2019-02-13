@@ -3,12 +3,6 @@ import logo from './logo.svg';
 import './App.css';
 import Search from './Search';
 
-
-const DEFAULT_QUERY = 'redux';
-const PATH_BASE = 'https://hn.algolia.com/api/v1';
-const PATH_SEARCH = '/search';
-const PARAM_SEARCH = 'query=';
-
 // const list = [
 //   {
 //     title: 'React',
@@ -34,6 +28,11 @@ const PARAM_SEARCH = 'query=';
 //   }
 // } //removed on page 95
 
+const DEFAULT_QUERY = 'redux';
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+const PARAM_PAGE = 'page=';
 
 class App extends Component {
   constructor(props) {
@@ -51,6 +50,18 @@ class App extends Component {
   }
   setSearchTopStories = (result) => {
     this.setState({ result });
+    console.log('result', result)
+    const { hits, page } = result;
+    const oldHits = page !== 0
+      ? this.state.result.hits
+      : [];
+    const updatedHits = [
+      ...oldHits,
+      ...hits
+    ];
+    this.setState({
+      result: { hits: updatedHits, page }
+    });
   }
 
   onSearchSubmit(event) {
@@ -59,8 +70,10 @@ class App extends Component {
     this.fetchSearchTopStories(searchTerm);
   }
 
-  fetchSearchTopStories(searchTerm) {
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+  fetchSearchTopStories(searchTerm, page=0) {
+    const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`;
+    //https://hn.algolia.com/api/v1/search?query=redux&page=0
+    fetch(url)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => error);
@@ -97,6 +110,7 @@ class App extends Component {
   render() {
     const helloWorld = 'Welcome to the Road to learn React'
     const {searchTerm, result} = this.state;
+    const page = (result && result.page) || 0;
     if (!result) { return null; }
     return (
       <div className="page">
@@ -113,6 +127,14 @@ class App extends Component {
             // pattern={searchTerm}
             onDismiss={this.onDismiss}/>
           }
+        <div className="interactions">
+         <Button onClick={() => this.fetchSearchTopStories(searchTerm, page - 1)}>
+            Previous
+          </Button>
+          <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
+            More
+          </Button>
+        </div>
         </div>
       </div>
     );
@@ -176,3 +198,5 @@ class Button extends Component { render() {
   
 
 export default App;
+
+
