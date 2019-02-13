@@ -27,12 +27,12 @@ const PARAM_SEARCH = 'query=';
 // }, 
 // ];
 
-function isSearched(searchTerm) {
-  return function (item) {
-    // some condition which returns true or false
-    return item.title.toLowerCase().includes(searchTerm.toLowerCase());
-  }
-}
+// function isSearched(searchTerm) {
+//   return function (item) {
+//     // some condition which returns true or false
+//     return item.title.toLowerCase().includes(searchTerm.toLowerCase());
+//   }
+// } //removed on page 95
 
 
 class App extends Component {
@@ -45,10 +45,25 @@ class App extends Component {
     }
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     //this.setSearchTopStories = this.setSearchTopStories.bind(this);
   }
   setSearchTopStories = (result) => {
     this.setState({ result });
+  }
+
+  onSearchSubmit(event) {
+    event.preventDefault();
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
+  }
+
+  fetchSearchTopStories(searchTerm) {
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => error);
   }
 
   onDismiss(id) {
@@ -70,11 +85,12 @@ class App extends Component {
   }
   componentDidMount() {
     const {searchTerm} = this.state;
-    console.log((`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`))
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
-      .then(response => response.json())
-      .then(result => this.setSearchTopStories(result))
-      .catch(error => error)
+    // console.log((`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`))
+    // fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+    //   .then(response => response.json())
+    //   .then(result => this.setSearchTopStories(result))
+    //   .catch(error => error)
+    this.fetchSearchTopStories(searchTerm);
   }
 
 
@@ -85,12 +101,17 @@ class App extends Component {
     return (
       <div className="page">
       <div className="interactions">
-        <Search value={searchTerm} onChange={this.onSearchChange}>Search</Search>
-        { result
-          ? <Table
+        <Search 
+          value={searchTerm}
+          onChange={this.onSearchChange}
+          onSubmit={this.onSearchSubmit}>
+          Search
+        </Search>
+        { result &&
+          <Table
             list={result.hits}
-            pattern={searchTerm}
-            onDismiss={this.onDismiss}/> : null
+            // pattern={searchTerm}
+            onDismiss={this.onDismiss}/>
           }
         </div>
       </div>
@@ -98,28 +119,47 @@ class App extends Component {
   }
 }
 
-class Table extends Component {
-  render() {
-    const { list, pattern, onDismiss } = this.props;
-    return (
-      <div className="table">
-        {list.filter(isSearched(pattern)).map(item =>
-         <div key={item.objectID} className="table-row">
-         <span>
-           <a href={item.url}>{item.title}</a>
-         </span>
-         <span>{item.author}</span>
-         <span>{item.num_comments}</span>
-         <span>{item.points}</span>
-         <span>
-          <Button onClick={() => onDismiss(item.objectID)} className="button-inline">
-                Dismiss
-          </Button>
-         </span>
-    </div> )}
-    </div> );
-  } 
-}
+const Table = ({ list, onDismiss }) =>
+  <div className="table">
+    {list.map(item =>
+      <div key={item.objectID} className="table-row">
+          <span>
+            <a href={item.url}>{item.title}</a>
+          </span>
+          <span>{item.author}</span>
+          <span>{item.num_comments}</span>
+          <span>{item.points}</span>
+          <span>
+           <Button onClick={() => onDismiss(item.objectID)} className="button-inline">
+                 Dismiss
+           </Button>
+          </span>
+     </div>
+    )}
+</div>
+
+// class Table extends Component {
+//   render() {
+//     const { list, pattern, onDismiss } = this.props;
+//     return (
+//       <div className="table">
+//         {list.filter(isSearched(pattern)).map(item =>
+//          <div key={item.objectID} className="table-row">
+//          <span>
+//            <a href={item.url}>{item.title}</a>
+//          </span>
+//          <span>{item.author}</span>
+//          <span>{item.num_comments}</span>
+//          <span>{item.points}</span>
+//          <span>
+//           <Button onClick={() => onDismiss(item.objectID)} className="button-inline">
+//                 Dismiss
+//           </Button>
+//          </span>
+//     </div> )}
+//     </div> );
+//   } 
+// }
 
 class Button extends Component { render() {
   const { onClick, className='', children,
