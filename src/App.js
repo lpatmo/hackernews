@@ -42,6 +42,7 @@ class App extends Component {
       results:null,
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
+      error: null,
     }
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
@@ -91,7 +92,7 @@ class App extends Component {
     fetch(url)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
-      .catch(error => error);
+      .catch(error => this.setState({ error }));
   }
 
   onDismiss(id) {
@@ -133,8 +134,12 @@ class App extends Component {
 
   render() {
     const helloWorld = 'Welcome to the Road to learn React'
-    const {searchTerm, results, searchKey} = this.state;
-    //const page = (result && result.page) || 0;
+    const {searchTerm, results, searchKey, error} = this.state;
+
+    if (error) {
+      return <p>Something went wrong.</p>;
+    }
+
     const page = (
       results &&
       results[searchKey] &&
@@ -170,8 +175,19 @@ class App extends Component {
             More
           </Button>
         </div>
+  
         </div>
+              {/* { error
+              ? 
+              <div className="interactions">
+                <p>Something went wrong.</p>
+              </div>
+              : <Table
+                list={list}
+                onDismiss={this.onDismiss}/> } */}
+
       </div>
+           
     );
   }
 }
