@@ -5,6 +5,7 @@ import axios from 'axios';
 import Search from './Search';
 import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
+import classNames from 'classnames';
 
 // const list = [
 //   {
@@ -43,12 +44,24 @@ const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
 
-const Sort = ({ sortKey, onSort, children }) => <Button
-onClick={() => onSort(sortKey)}
-className="button-inline"
+const Sort = ({
+  sortKey,
+  activeSortKey,
+  onSort,
+  children
+}) => {
+  const sortClass = classNames(
+    'button-inline',
+    { 'button-active': sortKey === activeSortKey }
+);
+return (
+    <Button
+      onClick={() => onSort(sortKey)}
+      className={sortClass}
 >
-{children}
-</Button>
+      {children}
+    </Button>
+); }
 
 class App extends Component {
   constructor(props) {
@@ -263,6 +276,7 @@ return(
               <Sort
                 sortKey={'TITLE'}
                 onSort={onSort}
+                activeSortKey={sortKey}
       > Title
               </Sort>
             </span>
@@ -270,6 +284,7 @@ return(
               <Sort
                 sortKey={'AUTHOR'}
                 onSort={onSort}
+                activeSortKey={sortKey}
               >
       Author
       </Sort>
@@ -278,6 +293,7 @@ return(
         <Sort
           sortKey={'COMMENTS'}
           onSort={onSort}
+          activeSortKey={sortKey}
         >
           Comments
         </Sort>
@@ -286,6 +302,7 @@ return(
         <Sort
           sortKey={'POINTS'}
           onSort={onSort}
+          activeSortKey={sortKey}
 > Points
         </Sort>
       </span>
