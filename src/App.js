@@ -4,6 +4,7 @@ import './App.css';
 import axios from 'axios';
 import Search from './Search';
 import PropTypes from 'prop-types';
+import { sortBy } from 'lodash';
 
 // const list = [
 //   {
@@ -29,12 +30,25 @@ import PropTypes from 'prop-types';
 //     return item.title.toLowerCase().includes(searchTerm.toLowerCase());
 //   }
 // } //removed on page 95
-
+const SORTS = {
+  NONE: list => list,
+  TITLE: list => sortBy(list, 'title'),
+  AUTHOR: list => sortBy(list, 'author'),
+  COMMENTS: list => sortBy(list, 'num_comments').reverse(),
+  POINTS: list => sortBy(list, 'points').reverse(),
+};
 const DEFAULT_QUERY = 'redux';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
+
+const Sort = ({ sortKey, onSort, children }) => <Button
+onClick={() => onSort(sortKey)}
+className="button-inline"
+>
+{children}
+</Button>
 
 class App extends Component {
   constructor(props) {
@@ -46,13 +60,19 @@ class App extends Component {
       searchTerm: DEFAULT_QUERY,
       error: null,
       isLoading: false,
+      sortKey: 'NONE',
     }
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
+    this.onSort = this.onSort.bind(this);
     //this.setSearchTopStories = this.setSearchTopStories.bind(this);
+  }
+
+  onSort(sortKey) {
+    this.setState({ sortKey });
   }
 
   needsToSearchTopStories(searchTerm) {
@@ -145,7 +165,7 @@ class App extends Component {
 
   render() {
     const helloWorld = 'Welcome to the Road to learn React'
-    const {searchTerm, results, searchKey, error, isLoading} = this.state;
+    const {searchTerm, results, searchKey, error, isLoading, sortKey} = this.state;
 
     if (error) {
       return <p>Something went wrong.</p>;
@@ -176,6 +196,8 @@ class App extends Component {
    
           <Table
             list={list}
+            sortKey={sortKey}
+            onSort={this.onSort}
             // pattern={searchTerm}
             onDismiss={this.onDismiss}/>
         <div className="interactions">
@@ -220,9 +242,44 @@ const withLoading = (Component) => ({ isLoading, ...rest }) =>
 
 const ButtonWithLoading = withLoading(Button);
 
-const Table = ({ list, onDismiss }) =>
+const Table = ({ list, onDismiss, sortKey, onSort }) =>
   <div className="table">
-    {list.map(item =>
+      <div className="table-header">
+            <span style={{ width: '40%' }}>
+              <Sort
+                sortKey={'TITLE'}
+                onSort={onSort}
+      > Title
+              </Sort>
+            </span>
+            <span style={{ width: '30%' }}>
+              <Sort
+                sortKey={'AUTHOR'}
+                onSort={onSort}
+              >
+      Author
+      </Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        <Sort
+          sortKey={'COMMENTS'}
+          onSort={onSort}
+        >
+          Comments
+        </Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        <Sort
+          sortKey={'POINTS'}
+          onSort={onSort}
+> Points
+        </Sort>
+      </span>
+      <span style={{ width: '10%' }}>
+        Archive
+      </span>
+    </div>
+    {SORTS[sortKey](list).map(item =>
       <div key={item.objectID} className="table-row">
           <span>
             <a href={item.url}>{item.title}</a>
