@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
 import Search from './Search';
+import PropTypes from 'prop-types';
 
 // const list = [
 //   {
@@ -38,12 +39,13 @@ const PARAM_PAGE = 'page=';
 class App extends Component {
   constructor(props) {
     super(props)
-    console.log(this.state)
+    //console.log(this.state)
     this.state = {
       results:null,
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
       error: null,
+      isLoading: false,
     }
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
@@ -52,6 +54,7 @@ class App extends Component {
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
     //this.setSearchTopStories = this.setSearchTopStories.bind(this);
   }
+
   needsToSearchTopStories(searchTerm) {
     return !this.state.results[searchTerm];
   }
@@ -74,7 +77,8 @@ class App extends Component {
       results: {
         ...results,
         [searchKey]: { hits: updatedHits, page }
-     }
+     },
+     isLoading: false
     });
   }
 
@@ -88,6 +92,7 @@ class App extends Component {
   }
 
   fetchSearchTopStories(searchTerm, page=0) {
+    this.setState({ isLoading: true });
     // const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`;
     // //https://hn.algolia.com/api/v1/search?query=redux&page=0
     // fetch(url)
@@ -95,7 +100,7 @@ class App extends Component {
     //   .then(result => this.setSearchTopStories(result))
     //   .catch(error => this.setState({ error }));
 
-    axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
+    axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`)
         .then(result => this.setSearchTopStories(result.data))
         .catch(error => this.setState({ error }));
   }
@@ -137,9 +142,10 @@ class App extends Component {
   }
 
 
+
   render() {
     const helloWorld = 'Welcome to the Road to learn React'
-    const {searchTerm, results, searchKey, error} = this.state;
+    const {searchTerm, results, searchKey, error, isLoading} = this.state;
 
     if (error) {
       return <p>Something went wrong.</p>;
@@ -173,12 +179,17 @@ class App extends Component {
             // pattern={searchTerm}
             onDismiss={this.onDismiss}/>
         <div className="interactions">
-         <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
-            Previous
-          </Button>
-          <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
-            More
-          </Button>
+        { isLoading
+            ? <Loading /> : 
+            <div>
+             <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
+                    Previous
+                  </Button>
+                  <Button onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
+                    More
+                  </Button>
+            </div>
+        }
         </div>
   
         </div>
@@ -196,6 +207,18 @@ class App extends Component {
     );
   }
 }
+const Loading = () => <div>Loading ...</div>
+
+
+
+const withEnhancement = (Component) => (props) => <Component { ...props } />
+
+const withLoading = (Component) => ({ isLoading, ...rest }) =>
+  isLoading
+    ? <Loading />
+    : <Component { ...rest } />
+
+const ButtonWithLoading = withLoading(Button);
 
 const Table = ({ list, onDismiss }) =>
   <div className="table">
@@ -214,8 +237,13 @@ const Table = ({ list, onDismiss }) =>
           </span>
      </div>
     )}
+    
 </div>
 
+Table.propTypes = {
+  list: PropTypes.array.isRequired,
+  onDismiss: PropTypes.func.isRequired,
+};
 // class Table extends Component {
 //   render() {
 //     const { list, pattern, onDismiss } = this.props;
@@ -251,8 +279,17 @@ class Button extends Component { render() {
           );
   }
 }
-  
+Button.propTypes = {
+  onClick: PropTypes.func,
+  className: PropTypes.string,
+  children: PropTypes.node,
+};
 
 export default App;
 
+export {
+  Button,
+  Search,
+  Table, 
+};
 
